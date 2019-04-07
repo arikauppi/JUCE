@@ -1044,12 +1044,15 @@ public:
         }
     }
 
-    double getMouseWheelDelta (double value, double wheelAmount)
+    double getMouseWheelDelta (double value, double wheelAmount, bool limitToLength)
     {
         if (style == IncDecButtons)
             return normRange.interval * wheelAmount;
 
         auto proportionDelta = wheelAmount * 0.15;
+        if (!limitToLength)
+            return proportionDelta;
+
         auto currentPos = owner.valueToProportionOfLength (value);
         return owner.proportionOfLengthToValue (jlimit (0.0, 1.0, currentPos + proportionDelta)) - value;
     }
@@ -1074,10 +1077,18 @@ public:
                     auto value = static_cast<double> (currentValue.getValue());
                     auto delta = getMouseWheelDelta (value, (std::abs (wheel.deltaX) > std::abs (wheel.deltaY)
                                                                   ? -wheel.deltaX : wheel.deltaY)
-                                                               * (wheel.isReversed ? -1.0f : 1.0f));
+                                                               * (wheel.isReversed ? -1.0f : 1.0f),
+                                                     rotaryParams.stopAtEnd);
                     if (delta != 0.0)
                     {
                         auto newValue = value + jmax (normRange.interval, std::abs (delta)) * (delta < 0 ? -1.0 : 1.0);
+                        if (!rotaryParams.stopAtEnd)
+                        {
+                            if (newValue < normRange.start)
+                                newValue += normRange.end - normRange.start;
+                            if (newValue > normRange.end)
+                                newValue -= normRange.end - normRange.start;
+                        }
 
                         DragInProgress drag (*this);
                         setValue (owner.snapValue (newValue, notDragging), sendNotificationSync);
