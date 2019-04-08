@@ -244,6 +244,9 @@ AudioParameterChoice::AudioParameterChoice (const String& idToUse, const String&
 {
     jassert (choices.size() > 0); // you must supply an actual set of items to choose from!
 
+    // Workaround: make slider mousewheel work.
+    range.interval = 1.f;
+
     if (stringFromIndexFunction == nullptr)
         stringFromIndexFunction = [this] (int index, int) { return choices [index]; };
 

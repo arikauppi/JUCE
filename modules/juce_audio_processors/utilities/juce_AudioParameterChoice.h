@@ -99,7 +99,7 @@ private:
     String getText (float, int) const override;
     float getValueForText (const String&) const override;
 
-    const NormalisableRange<float> range;
+    NormalisableRange<float> range;
     float value;
     const float defaultValue;
     std::function<String (int, int)> stringFromIndexFunction;
